@@ -1,0 +1,69 @@
+{
+  "830230755": {
+    "user_id": 830230755,
+    "username": "I_KoKoSi",
+    "first_name": "Владислав",
+    "joined_date": "2025-10-08",
+    "total_points": 20,
+    "progress": {
+      "articles_viewed": {},
+      "quizzes_completed": {
+        "VBA_basic": {
+          "score": 20,
+          "max_score": 20,
+          "date": "2025-10-08 21:14:56"
+        }
+      },
+      "achievements": [
+        "perfect_score"
+      ]
+    },
+    "stats": {
+      "quizzes_taken": 2,
+      "articles_read": 0,
+      "average_score": 100.0
+    }
+  },
+  "1823137308": {
+    "user_id": 1823137308,
+    "username": null,
+    "first_name": "𝓥",
+    "joined_date": "2025-10-08",
+    "total_points": 0,
+    "progress": {
+      "articles_viewed": {},
+      "quizzes_completed": {},
+      "achievements": []
+    },
+    "stats": {
+      "quizzes_taken": 0,
+      "articles_read": 0,
+      "average_score": 0
+    }
+  },
+  "894272011": {
+    "user_id": 894272011,
+    "username": "wessssaaassss",
+    "first_name": "даня",
+    "joined_date": "2025-10-08",
+    "total_points": 10,
+    "progress": {
+      "articles_viewed": {},
+      "quizzes_completed": {
+        "VBA_basic": {
+          "score": 10,
+          "max_score": 20,
+          "date": "2025-10-08 21:15:11"
+        }
+      },
+      "achievements": [
+        "first_quiz"
+      ]
+    },
+    "stats": {
+      "quizzes_taken": 1,
+      "articles_read": 0,
+      "average_score": 50.0
+    }
+  }
+}
