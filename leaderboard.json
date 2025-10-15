@@ -1,0 +1,23 @@
+{
+  "ranking": [
+    {
+      "user_id": 830230755,
+      "username": "I_KoKoSi",
+      "first_name": "Владислав",
+      "total_points": 105,
+      "quizzes_taken": 4,
+      "articles_read": 6,
+      "rank": 1
+    },
+    {
+      "user_id": 1823137308,
+      "username": "без username",
+      "first_name": "𝓥",
+      "total_points": 10,
+      "quizzes_taken": 0,
+      "articles_read": 1,
+      "rank": 2
+    }
+  ],
+  "last_updated": "2025-10-15 21:06:49"
+}

@@ -1,0 +1,89 @@
+{
+  "VBA": {
+    "data_types": {
+      "id": "vba_data_types",
+      "title": "Типы данных в VBA",
+      "url": "https://telegra.ph/Tipy-dannyh-12-16-2",
+      "description": "Изучите основные типы данных в VBA",
+      "difficulty": "beginner",
+      "points": 10,
+      "estimated_time": "5 минут"
+    },
+    "input_output": {
+      "id": "vba_input_output", 
+      "title": "Ввод и вывод данных в VBA",
+      "url": "https://telegra.ph/Vvod-i-vyvod-dannyh-12-16-2",
+      "description": "Работа с вводом и выводом данных",
+      "difficulty": "beginner",
+      "points": 15,
+      "estimated_time": "7 минут"
+    },
+    "functions": {
+      "id": "vba_functions",
+      "title": "Функции в VBA",
+      "url": "https://telegra.ph/Funkcii-12-16-3",
+      "description": "Создание и использование функций",
+      "difficulty": "intermediate",
+      "points": 20,
+      "estimated_time": "10 минут"
+    }
+  },
+  "C": {
+    "data_types": {
+      "id": "c_data_types",
+      "title": "Типы данных в C",
+      "url": "https://telegra.ph/Osnovnye-tipy-dannyh-12-16",
+      "description": "Основные типы данных языка C",
+      "difficulty": "beginner",
+      "points": 10,
+      "estimated_time": "5 минут"
+    },
+    "input_output": {
+      "id": "c_input_output",
+      "title": "Ввод и вывод в C",
+      "url": "https://telegra.ph/Vvod-dannyh-12-16",
+      "description": "Работа с вводом и выводом данных в C",
+      "difficulty": "beginner", 
+      "points": 15,
+      "estimated_time": "8 минут"
+    },
+    "functions": {
+      "id": "c_functions",
+      "title": "Функции в C",
+      "url": "https://telegra.ph/Funkcii-12-16",
+      "description": "Создание и использование функций в C",
+      "difficulty": "intermediate",
+      "points": 20,
+      "estimated_time": "12 минут"
+    }
+  },
+  "Bash": {
+    "data_types": {
+      "id": "bash_data_types",
+      "title": "Типы данных в Bash",
+      "url": "https://telegra.ph/Tipy-dannyh-12-16",
+      "description": "Типы данных и переменные в Bash",
+      "difficulty": "beginner",
+      "points": 10,
+      "estimated_time": "6 минут"
+    },
+    "input_output": {
+      "id": "bash_input_output",
+      "title": "Ввод и вывод в Bash", 
+      "url": "https://telegra.ph/Vvod-i-vyvod-dannyh-12-16",
+      "description": "Работа с вводом и выводом в Bash",
+      "difficulty": "beginner",
+      "points": 15,
+      "estimated_time": "8 минут"
+    },
+    "functions": {
+      "id": "bash_functions",
+      "title": "Функции в Bash",
+      "url": "https://telegra.ph/Funkcii-12-16-2",
+      "description": "Создание и использование функций в Bash",
+      "difficulty": "intermediate",
+      "points": 20,
+      "estimated_time": "10 минут"
+    }
+  }
+}

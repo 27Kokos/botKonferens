@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 import html
 
-# Инициализация ботов
+# Инициализация бота
 bot = telebot.TeleBot('8317740647:AAEsqXPmGOrZSgDbaIMUnJPvnBO_ZYFvfgQ') 
 
 # Файлы данных
@@ -13,6 +13,7 @@ USER_STATES_FILE = 'user_states.json'
 USERS_FILE = 'users.json'
 QUIZZES_FILE = 'quizzes.json'
 LEADERBOARD_FILE = 'leaderboard.json'
+ARTICLES_FILE = 'articles.json'
 
 # Загрузка и сохранение данных
 def load_data(file_path):
@@ -36,6 +37,67 @@ def save_data(data, file_path):
         print(f"Ошибка при сохранении данных {file_path}: {e}")
         return False
 
+def load_articles():
+    """Загрузка структуры статей"""
+    return load_data(ARTICLES_FILE)
+
+def get_article(language, article_key):
+    """Получение данных статьи"""
+    articles = load_articles()
+    return articles.get(language, {}).get(article_key)
+
+def mark_article_as_read(user_id, language, article_key):
+    """Пометить статью как прочитанную"""
+    users = load_data(USERS_FILE)
+    user_id_str = str(user_id)
+    
+    if user_id_str not in users:
+        return False
+    
+    user = users[user_id_str]
+    
+    # Инициализируем структуру если нет
+    if 'articles_viewed' not in user['progress']:
+        user['progress']['articles_viewed'] = {}
+    
+    if language not in user['progress']['articles_viewed']:
+        user['progress']['articles_viewed'][language] = []
+    
+    # Проверяем, не прочитана ли уже статья
+    if article_key not in user['progress']['articles_viewed'][language]:
+        user['progress']['articles_viewed'][language].append(article_key)
+        
+        # Начисляем очки за прочтение
+        article = get_article(language, article_key)
+        if article:
+            user['total_points'] += article.get('points', 10)
+        
+        # Обновляем статистику
+        user['stats']['articles_read'] = sum(len(articles) for articles in user['progress']['articles_viewed'].values())
+        
+        # Обновляем изученные языки
+        user['stats']['languages_learned'] = list(user['progress']['articles_viewed'].keys())
+        
+        save_data(users, USERS_FILE)
+        
+        # Обновляем лидерборд
+        update_leaderboard()
+        
+        return True
+    
+    return False
+
+def get_user_articles_progress(user_id, language):
+    """Получить прогресс по статьям для языка"""
+    users = load_data(USERS_FILE)
+    user_id_str = str(user_id)
+    
+    if user_id_str not in users:
+        return []
+    
+    user = users[user_id_str]
+    return user['progress']['articles_viewed'].get(language, [])
+
 def init_user(user_id, username, first_name):
     """Инициализация нового пользователя"""
     users = load_data(USERS_FILE)
@@ -56,7 +118,9 @@ def init_user(user_id, username, first_name):
             "stats": {
                 "quizzes_taken": 0,
                 "articles_read": 0,
-                "average_score": 0
+                "average_score": 0,
+                "total_reading_time": 0,
+                "languages_learned": []
             }
         }
         save_data(users, USERS_FILE)
@@ -115,8 +179,92 @@ def update_user_after_quiz(user_id, quiz_id, score, max_score):
             user['progress']['achievements'].append('first_quiz')
         
         save_data(users, USERS_FILE)
+        
+        # Обновляем лидерборд
+        update_leaderboard()
+        
         return True
     return False
+
+# Функции лидерборда
+def update_leaderboard():
+    """Обновление лидерборда"""
+    users = load_data(USERS_FILE)
+    leaderboard = load_data(LEADERBOARD_FILE)
+    
+    # Общий рейтинг (по общим очкам)
+    ranking = []
+    for user_id, user_data in users.items():
+        ranking.append({
+            "user_id": int(user_id),
+            "username": user_data['username'],
+            "first_name": user_data['first_name'],
+            "total_points": user_data['total_points'],
+            "quizzes_taken": user_data['stats']['quizzes_taken'],
+            "articles_read": user_data['stats']['articles_read']
+        })
+    
+    # Сортируем по очкам (по убыванию)
+    ranking.sort(key=lambda x: x['total_points'], reverse=True)
+    
+    # Добавляем ранги
+    for i, user in enumerate(ranking):
+        user['rank'] = i + 1
+    
+    leaderboard['ranking'] = ranking
+    leaderboard['last_updated'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    save_data(leaderboard, LEADERBOARD_FILE)
+    return leaderboard
+
+def get_leaderboard_display_name(user_data):
+    """Получить отображаемое имя пользователя"""
+    if user_data.get('username'):
+        return f"@{user_data['username']}"
+    else:
+        return user_data['first_name']
+
+def show_leaderboard(chat_id, message_id=None):
+    """Показать лидерборд"""
+    if message_id:
+        bot.delete_message(chat_id, message_id)
+    
+    # Обновляем лидерборд перед показом
+    leaderboard = update_leaderboard()
+    
+    ranking = leaderboard['ranking'][:15]  # Топ-15
+    last_updated = leaderboard['last_updated']
+    
+    leaderboard_text = "🏆 <b>Общий рейтинг</b>\n\n"
+    
+    if not ranking:
+        leaderboard_text += "📊 Пока никто не заработал очков.\nБудьте первым!"
+    else:
+        for i, user in enumerate(ranking):
+            medal = ""
+            if i == 0: medal = "🥇"
+            elif i == 1: medal = "🥈" 
+            elif i == 2: medal = "🥉"
+            else: medal = f"{i+1}."
+            
+            leaderboard_text += (
+                f"{medal} <b>{get_leaderboard_display_name(user)}</b>\n"
+                f"   ⭐ {user['total_points']} очков | "
+                f"📚 {user['articles_read']} статей | "
+                f"🧠 {user['quizzes_taken']} тестов\n"
+            )
+    
+    leaderboard_text += f"\n🕐 Обновлено: {last_updated}"
+    
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton('🔄 Обновить', callback_data='leaderboard'))
+    markup.add(types.InlineKeyboardButton('📊 Мой прогресс', callback_data='progress'))
+    markup.add(types.InlineKeyboardButton('🏠 В главное меню', callback_data='back_to_main'))
+    
+    bot.send_message(chat_id, leaderboard_text, reply_markup=markup, parse_mode='HTML')
+    
+    user_states[str(chat_id)] = 'leaderboard'
+    save_data(user_states, USER_STATES_FILE)
 
 # Загрузка состояний пользователей
 user_states = load_data(USER_STATES_FILE)
@@ -142,7 +290,8 @@ def start(message):
         f"• 📚 Изучать материалы по разным языкам\n"
         f"• 🧠 Проверять знания в тестах\n"
         f"• 📊 Следить за своим прогрессом\n"
-        f"• 🏆 Зарабатывать достижения\n\n"
+        f"• 🏆 Соревноваться в рейтинге\n"
+        f"• 💡 Предлагать улучшения\n\n"
         f"<b>Выбери действие:</b>"
     )
     
@@ -150,6 +299,7 @@ def start(message):
     markup.add(types.InlineKeyboardButton('📚 Языки программирования', callback_data='languages'))
     markup.add(types.InlineKeyboardButton('🧠 Пройти тест', callback_data='take_quiz'))
     markup.add(types.InlineKeyboardButton('📊 Мой прогресс', callback_data='progress'))
+    markup.add(types.InlineKeyboardButton('🏆 Лидерборд', callback_data='leaderboard'))
     markup.add(types.InlineKeyboardButton('💡 Предложения', callback_data='predlozka'))
     
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup, parse_mode='HTML')
@@ -161,6 +311,11 @@ def start(message):
 def progress_command(message):
     """Команда для просмотра прогресса"""
     show_progress(message.chat.id)
+
+@bot.message_handler(commands=['leaderboard'])
+def leaderboard_command(message):
+    """Команда для просмотра лидерборда"""
+    show_leaderboard(message.chat.id)
 
 def show_progress(chat_id):
     """Показать прогресс пользователя"""
@@ -190,14 +345,23 @@ def show_progress(chat_id):
         f"📈 <b>Средний балл:</b> {avg_score}%\n"
     )
     
+    # Добавляем прогресс по языкам
+    if user['progress']['articles_viewed']:
+        progress_text += "\n🌍 <b>Прогресс по языкам:</b>\n"
+        articles_data = load_articles()
+        
+        for language, read_articles in user['progress']['articles_viewed'].items():
+            total_articles_in_lang = len(articles_data.get(language, {}))
+            if total_articles_in_lang > 0:
+                percentage = (len(read_articles) / total_articles_in_lang) * 100
+                progress_text += f"• <b>{language}</b>: {len(read_articles)}/{total_articles_in_lang} ({percentage:.1f}%)\n"
+    
     # Добавляем информацию о пройденных тестах
     if user['progress']['quizzes_completed']:
         progress_text += "\n🎯 <b>Пройденные тесты:</b>\n"
         for quiz_name, result in user['progress']['quizzes_completed'].items():
             percentage = (result['score'] / result['max_score']) * 100
             progress_text += f"• <b>{html.escape(quiz_name)}</b>: {result['score']}/{result['max_score']} ({percentage:.1f}%)\n"
-    else:
-        progress_text += "\n🎯 <b>Пройденные тесты:</b> пока нет\n"
     
     # Добавляем достижения
     if user['progress']['achievements']:
@@ -207,12 +371,11 @@ def show_progress(chat_id):
         }
         user_achievements = [achievements_text.get(a, a) for a in user['progress']['achievements']]
         progress_text += f"\n🏅 <b>Достижения:</b>\n" + "\n".join([f"• {a}" for a in user_achievements])
-    else:
-        progress_text += "\n🏅 <b>Достижения:</b> пока нет\n"
     
     markup = types.InlineKeyboardMarkup()
-    markup.add(types.InlineKeyboardButton('🧠 Пройти тест', callback_data='take_quiz'))
     markup.add(types.InlineKeyboardButton('📚 Изучать материалы', callback_data='languages'))
+    markup.add(types.InlineKeyboardButton('🧠 Пройти тест', callback_data='take_quiz'))
+    markup.add(types.InlineKeyboardButton('🏆 Лидерборд', callback_data='leaderboard'))
     markup.add(types.InlineKeyboardButton('🏠 В главное меню', callback_data='back_to_main'))
     
     bot.send_message(chat_id, progress_text, reply_markup=markup, parse_mode='HTML')
@@ -221,7 +384,6 @@ def show_progress(chat_id):
 def callback_message(callback):
     user_id = callback.message.chat.id
     user_id_str = str(user_id)
-    current_state = user_states.get(user_id_str, 'main_menu')
     
     try:
         # Обработка основных действий
@@ -274,6 +436,48 @@ def callback_message(callback):
         # Завершение теста
         elif callback.data == 'end_quiz':
             end_quiz_early(user_id, callback.message.message_id)
+        
+        # Обработка выбора статьи (ИСПРАВЛЕНО - используем :: вместо _)
+        elif callback.data.startswith('article::'):
+            parts = callback.data.split('::')
+            if len(parts) >= 3:
+                language = parts[1]
+                article_key = parts[2]
+                show_article_menu(user_id, language, article_key, callback.message.message_id)
+            else:
+                bot.send_message(user_id, "❌ Ошибка при загрузке статьи.")
+        
+        # Обработка отметки прочтения (ИСПРАВЛЕНО - используем :: вместо _)
+        elif callback.data.startswith('mark_read::'):
+            parts = callback.data.split('::')
+            if len(parts) >= 3:
+                language = parts[1]
+                article_key = parts[2]
+                
+                success = mark_article_as_read(user_id, language, article_key)
+                
+                if success:
+                    article = get_article(language, article_key)
+                    points = article.get('points', 10) if article else 10
+                    
+                    bot.answer_callback_query(
+                        callback.id, 
+                        f"✅ Статья отмечена как прочитанная! +{points} очков"
+                    )
+                    
+                    # Обновляем сообщение
+                    show_article_menu(user_id, language, article_key, callback.message.message_id)
+                else:
+                    bot.answer_callback_query(
+                        callback.id, 
+                        "❌ Статья уже была прочитана ранее"
+                    )
+            else:
+                bot.answer_callback_query(callback.id, "❌ Ошибка при отметке статьи")
+        
+        # Обработка лидерборда
+        elif callback.data == 'leaderboard':
+            show_leaderboard(user_id, message_id=callback.message.message_id)
     
     except Exception as e:
         print(f"Ошибка в обработчике callback: {e}")
@@ -304,71 +508,100 @@ def show_language_specific_menu(chat_id, language, message_id):
     """Показать меню для конкретного языка"""
     bot.delete_message(chat_id, message_id)
     
-    # Определяем материалы для каждого языка
-    language_data = {
-        'VBA': {
-            'articles': [
-                ('📖 Типы данных', 'https://telegra.ph/Tipy-dannyh-12-16-2'),
-                ('📖 Ввод и вывод данных', 'https://telegra.ph/Vvod-i-vyvod-dannyh-12-16-2'),
-                ('📖 Функции', 'https://telegra.ph/Funkcii-12-16-3')
-            ],
-            'quiz_id': 'VBA_basic'
-        },
-        'C': {
-            'articles': [
-                ('📖 Типы данных', 'https://telegra.ph/Osnovnye-tipy-dannyh-12-16'),
-                ('📖 Ввод и вывод данных', 'https://telegra.ph/Vvod-dannyh-12-16'),
-                ('📖 Функции', 'https://telegra.ph/Funkcii-12-16')
-            ],
-            'quiz_id': 'C_basic'
-        },
-        'Bash': {
-            'articles': [
-                ('📖 Типы данных', 'https://telegra.ph/Tipy-dannyh-12-16'),
-                ('📖 Ввод и вывод данных', 'https://telegra.ph/Vvod-i-vyvod-dannyh-12-16'),
-                ('📖 Функции', 'https://telegra.ph/Funkcii-12-16-2')
-            ],
-            'quiz_id': 'Bash_basic'
-        },
-        'Python': {
-            'articles': [
-                ('📖 Основы синтаксиса', 'https://telegra.ph/Osnovy-sintaksisa-Python-12-16'),
-                ('📖 Типы данных', 'https://telegra.ph/Tipy-dannyh-Python-12-16'),
-                ('📖 Функции', 'https://telegra.ph/Funkcii-Python-12-16')
-            ],
-            'quiz_id': 'Python_basic'
-        },
-        'JavaScript': {
-            'articles': [
-                ('📖 Основы синтаксиса', 'https://telegra.ph/Osnovy-sintaksisa-JavaScript-12-16'),
-                ('📖 Типы данных', 'https://telegra.ph/Tipy-dannyh-JavaScript-12-16'),
-                ('📖 Функции', 'https://telegra.ph/Funkcii-JavaScript-12-16')
-            ],
-            'quiz_id': 'JavaScript_basic'
-        }
-    }
-    
-    data = language_data.get(language, {'articles': [], 'quiz_id': None})
+    articles = load_articles().get(language, {})
+    user_progress = get_user_articles_progress(chat_id, language)
     
     markup = types.InlineKeyboardMarkup()
     
-    # Добавляем кнопки для статей
-    for article_name, article_url in data['articles']:
-        markup.add(types.InlineKeyboardButton(article_name, url=article_url))
+    # Добавляем кнопки для статей с индикацией прогресса (ИСПРАВЛЕНО - используем :: вместо _)
+    for article_key, article_data in articles.items():
+        is_read = article_key in user_progress
+        emoji = "✅" if is_read else "📖"
+        button_text = f"{emoji} {article_data['title']}"
+        markup.add(types.InlineKeyboardButton(
+            button_text, 
+            callback_data=f'article::{language}::{article_key}'
+        ))
     
-    # Добавляем кнопку для теста, если он есть
-    if data['quiz_id']:
-        markup.add(types.InlineKeyboardButton('🧠 Пройти тест', callback_data=f'quiz_{data["quiz_id"]}'))
+    # Добавляем кнопку для теста
+    language_data = {
+        'VBA': 'VBA_basic',
+        'C': 'C_basic', 
+        'Bash': 'Bash_basic',
+        'Python': 'Python_basic',
+        'JavaScript': 'JavaScript_basic'
+    }
+    
+    quiz_id = language_data.get(language)
+    if quiz_id:
+        markup.add(types.InlineKeyboardButton('🧠 Пройти тест', callback_data=f'quiz_{quiz_id}'))
+    
+    # Показываем прогресс по языку
+    progress_text = ""
+    if articles:
+        progress_percentage = (len(user_progress) / len(articles)) * 100
+        progress_text = f"\n📊 Прогресс: {len(user_progress)}/{len(articles)} ({progress_percentage:.1f}%)"
+    else:
+        progress_text = "\n📊 Статьи для этого языка пока не добавлены"
     
     markup.add(types.InlineKeyboardButton('📚 Другие языки', callback_data='back_to_languages'))
     markup.add(types.InlineKeyboardButton('🏠 В главное меню', callback_data='back_to_main'))
     
     bot.send_message(chat_id, 
-                    f'📚 <b>{html.escape(language)}</b>\n\n'
-                    f'Выберите материал для изучения или пройдите тест:', 
+                    f'📚 <b>{html.escape(language)}</b>{progress_text}\n\n'
+                    f'Выберите статью для изучения:', 
                     reply_markup=markup, parse_mode='HTML')
     
     user_states[str(chat_id)] = f'{language.lower()}_menu'
+    save_data(user_states, USER_STATES_FILE)
+
+def show_article_menu(chat_id, language, article_key, message_id):
+    """Показать меню статьи"""
+    bot.delete_message(chat_id, message_id)
+    
+    article = get_article(language, article_key)
+    if not article:
+        bot.send_message(chat_id, "❌ Статья не найдена.")
+        return
+    
+    user_progress = get_user_articles_progress(chat_id, language)
+    is_read = article_key in user_progress
+    
+    # Формируем сообщение со статьей
+    article_text = (
+        f"📖 <b>{html.escape(article['title'])}</b>\n\n"
+        f"📝 {html.escape(article['description'])}\n\n"
+        f"⚡ <b>Сложность:</b> {article['difficulty']}\n"
+        f"⏱ <b>Время изучения:</b> {article['estimated_time']}\n"
+        f"🏆 <b>Награда:</b> {article['points']} очков\n"
+        f"📊 <b>Статус:</b> {'✅ Прочитано' if is_read else '❌ Не прочитано'}\n\n"
+        f"Изучите статью и отметьте прочтение:"
+    )
+    
+    markup = types.InlineKeyboardMarkup()
+    
+    # Кнопка для перехода к статье
+    markup.add(types.InlineKeyboardButton(
+        '🔗 Перейти к статье', 
+        url=article['url']
+    ))
+    
+    # Кнопка для отметки прочтения (только если еще не прочитана) (ИСПРАВЛЕНО - используем :: вместо _)
+    if not is_read:
+        markup.add(types.InlineKeyboardButton(
+            '✅ Отметить как прочитанную', 
+            callback_data=f'mark_read::{language}::{article_key}'
+        ))
+    
+    markup.add(types.InlineKeyboardButton(
+        '📚 Назад к статьям', 
+        callback_data=f'{language}'
+    ))
+    markup.add(types.InlineKeyboardButton('🏠 В главное меню', callback_data='back_to_main'))
+    
+    bot.send_message(chat_id, article_text, reply_markup=markup, parse_mode='HTML')
+    
+    user_states[str(chat_id)] = f'article_{language}_{article_key}'
     save_data(user_states, USER_STATES_FILE)
 
 def show_quiz_selection(chat_id, message_id):
@@ -600,6 +833,7 @@ def predlozka(message):
     markup.add(types.InlineKeyboardButton('📚 Языки программирования', callback_data='languages'))
     markup.add(types.InlineKeyboardButton('🧠 Пройти тест', callback_data='take_quiz'))
     markup.add(types.InlineKeyboardButton('📊 Мой прогресс', callback_data='progress'))
+    markup.add(types.InlineKeyboardButton('🏆 Лидерборд', callback_data='leaderboard'))
     
     bot.send_message(message.chat.id, 
                     '✅ <b>Спасибо за ваше предложение!</b>\n\n'
