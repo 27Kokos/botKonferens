@@ -4,12 +4,13 @@
     "username": "I_KoKoSi",
     "first_name": "Владислав",
     "joined_date": "2024-01-15",
-    "total_points": 105,
+    "total_points": 125,
     "progress": {
       "articles_viewed": {
         "VBA": [
           "data_types",
-          "input_output"
+          "input_output",
+          "functions"
         ],
         "C": [
           "input_output",
@@ -38,7 +39,7 @@
     },
     "stats": {
       "quizzes_taken": 4,
-      "articles_read": 6,
+      "articles_read": 7,
       "average_score": 100.0,
       "total_reading_time": 650,
       "languages_learned": [

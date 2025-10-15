@@ -4,6 +4,12 @@ import json
 import os
 from datetime import datetime
 import html
+import sys
+import codecs
+
+# Устанавливаем кодировку UTF-8 для вывода в консоль
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
 
 # Инициализация бота
 bot = telebot.TeleBot('8317740647:AAEsqXPmGOrZSgDbaIMUnJPvnBO_ZYFvfgQ') 
@@ -14,6 +20,7 @@ USERS_FILE = 'users.json'
 QUIZZES_FILE = 'quizzes.json'
 LEADERBOARD_FILE = 'leaderboard.json'
 ARTICLES_FILE = 'articles.json'
+MODERATION_DB_FILE = 'moderation_db.json'
 
 # Загрузка и сохранение данных
 def load_data(file_path):
@@ -86,6 +93,47 @@ def mark_article_as_read(user_id, language, article_key):
         return True
     
     return False
+
+def load_moderation_db():
+    """Загрузка базы модерации"""
+    return load_data(MODERATION_DB_FILE)
+
+def save_moderation_db(data):
+    """Сохранение базы модерации"""
+    return save_data(data, MODERATION_DB_FILE)
+
+def add_suggestion_to_moderation(user_id, username, first_name, suggestion_text):
+    """Добавление предложения в очередь модерации"""
+    moderation_db = load_moderation_db()
+    
+    if 'moderation_queue' not in moderation_db:
+        moderation_db['moderation_queue'] = []
+    
+    suggestion = {
+        "id": f"{user_id}_{int(datetime.now().timestamp())}",
+        "type": "suggestion",
+        "user_id": user_id,
+        "user_data": {
+            "username": username,
+            "first_name": first_name
+        },
+        "content": suggestion_text,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "status": "pending",
+        "moderator_id": None,
+        "response": None
+    }
+    
+    moderation_db['moderation_queue'].append(suggestion)
+    
+    # Обновляем статистику
+    if 'suggestion_stats' not in moderation_db:
+        moderation_db['suggestion_stats'] = {"total": 0, "approved": 0, "rejected": 0, "pending": 0}
+    
+    moderation_db['suggestion_stats']['total'] += 1
+    moderation_db['suggestion_stats']['pending'] += 1
+    
+    return save_moderation_db(moderation_db)
 
 def get_user_articles_progress(user_id, language):
     """Получить прогресс по статьям для языка"""
@@ -821,8 +869,29 @@ def predlozka(message):
     text_predloz = message.text
     user_info = f"Пользователь: @{message.from_user.username or 'нет'} ({message.from_user.first_name or 'нет'})"
     
-    # Вместо отправки в бот поддержки, просто логируем
-    print(f"💡 Получено предложение от {user_info}: {text_predloz}")
+    # Добавляем предложение в очередь модерации
+    success = add_suggestion_to_moderation(
+        message.chat.id,
+        message.from_user.username,
+        message.from_user.first_name,
+        text_predloz
+    )
+    
+    if success:
+        # Безопасный вывод для консоли Windows
+        try:
+            print(f"IDEA: Получено предложение от {user_info}: {text_predloz}")
+        except UnicodeEncodeError:
+            # Если все равно возникает ошибка кодировки, используем безопасный вывод
+            safe_user_info = user_info.encode('utf-8', errors='replace').decode('utf-8')
+            safe_text = text_predloz.encode('utf-8', errors='replace').decode('utf-8')
+            print(f"IDEA: Получено предложение от {safe_user_info}: {safe_text}")
+    else:
+        try:
+            print(f"ERROR: Ошибка при добавлении предложения в очередь от {user_info}")
+        except UnicodeEncodeError:
+            safe_user_info = user_info.encode('utf-8', errors='replace').decode('utf-8')
+            print(f"ERROR: Ошибка при добавлении предложения в очередь от {safe_user_info}")
     
     # Сбрасываем состояние и показываем меню
     user_states[str(message.chat.id)] = 'main_menu'
@@ -845,5 +914,11 @@ import atexit
 atexit.register(lambda: save_data(user_states, USER_STATES_FILE))
 
 if __name__ == '__main__':
-    print("Бот CodeForge запущен...")
-    bot.polling(none_stop=True)
+    try:
+        print("Бот CodeForge запущен...")
+        bot.polling(none_stop=True)
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
+        # Добавляем паузу перед завершением, чтобы увидеть ошибку
+        import time
+        time.sleep(10)

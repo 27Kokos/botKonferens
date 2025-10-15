@@ -1,0 +1,28 @@
+{
+  "moderation_queue": [
+    {
+      "id": "830230755_1760561530",
+      "type": "suggestion",
+      "user_id": 830230755,
+      "user_data": {
+        "username": "I_KoKoSi",
+        "first_name": "Владислав"
+      },
+      "content": "Привет",
+      "timestamp": "2025-10-15 23:52:10",
+      "status": "approved",
+      "moderator_id": 830230755,
+      "response": null,
+      "processed_date": "2025-10-15 23:53:40"
+    }
+  ],
+  "moderators": [
+    830230755
+  ],
+  "suggestion_stats": {
+    "total": 1,
+    "approved": 1,
+    "rejected": 0,
+    "pending": 0
+  }
+}
