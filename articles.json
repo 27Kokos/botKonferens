@@ -10,7 +10,7 @@
       "estimated_time": "5 минут"
     },
     "input_output": {
-      "id": "vba_input_output", 
+      "id": "vba_input_output",
       "title": "Ввод и вывод данных в VBA",
       "url": "https://telegra.ph/Vvod-i-vyvod-dannyh-12-16-2",
       "description": "Работа с вводом и выводом данных",
@@ -43,7 +43,7 @@
       "title": "Ввод и вывод в C",
       "url": "https://telegra.ph/Vvod-dannyh-12-16",
       "description": "Работа с вводом и выводом данных в C",
-      "difficulty": "beginner", 
+      "difficulty": "beginner",
       "points": 15,
       "estimated_time": "8 минут"
     },
@@ -69,7 +69,7 @@
     },
     "input_output": {
       "id": "bash_input_output",
-      "title": "Ввод и вывод в Bash", 
+      "title": "Ввод и вывод в Bash",
       "url": "https://telegra.ph/Vvod-i-vyvod-dannyh-12-16",
       "description": "Работа с вводом и выводом в Bash",
       "difficulty": "beginner",
@@ -81,6 +81,35 @@
       "title": "Функции в Bash",
       "url": "https://telegra.ph/Funkcii-12-16-2",
       "description": "Создание и использование функций в Bash",
+      "difficulty": "intermediate",
+      "points": 20,
+      "estimated_time": "10 минут"
+    }
+  },
+  "Python": {
+    "data_types": {
+      "id": "py_data_types",
+      "title": "Типы данных в Python",
+      "url": "https://telegra.ph/Tipy-dannyh-10-11",
+      "description": "Базовые типы данных и их применение в Python",
+      "difficulty": "beginner",
+      "points": 10,
+      "estimated_time": "5 минут"
+    },
+    "input_output": {
+      "id": "py_input_output",
+      "title": "Ввод и вывод данных в Python",
+      "url": "https://telegra.ph/Vvod-i-vyvod-dannyh-v-Python-10-16",
+      "description": "Основы работы с вводом и выводом (статья-ссылка, предоставленная вами)",
+      "difficulty": "beginner",
+      "points": 15,
+      "estimated_time": "7 минут"
+    },
+    "functions": {
+      "id": "py_functions",
+      "title": "Функции в Python",
+      "url": "https://telegra.ph/Funkcii-v-Python-10-16",
+      "description": "Объявление, параметры, замыкания, декораторы",
       "difficulty": "intermediate",
       "points": 20,
       "estimated_time": "10 минут"
