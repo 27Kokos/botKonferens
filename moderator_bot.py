@@ -50,6 +50,41 @@ def is_moderator(user_id):
     moderation_db = load_moderation_db()
     return user_id in moderation_db.get('moderators', [])
 
+def get_pending_suggestions():
+    """Получить ожидающие предложения"""
+    moderation_db = load_moderation_db()
+    return [s for s in moderation_db.get('moderation_queue', []) if s['status'] == 'pending']
+
+def get_processed_suggestions(limit=10):
+    """Получить обработанные предложения"""
+    moderation_db = load_moderation_db()
+    all_suggestions = moderation_db.get('moderation_queue', [])
+    processed = [s for s in all_suggestions if s['status'] in ['approved', 'rejected']]
+    return sorted(processed, key=lambda x: x.get('processed_date', x['timestamp']), reverse=True)[:limit]
+
+def update_suggestion_status(suggestion_id, status, moderator_id, response=None):
+    """Обновить статус предложения"""
+    moderation_db = load_moderation_db()
+    
+    for suggestion in moderation_db['moderation_queue']:
+        if suggestion['id'] == suggestion_id:
+            suggestion['status'] = status
+            suggestion['moderator_id'] = moderator_id
+            suggestion['response'] = response
+            suggestion['processed_date'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            break
+    
+    # Обновляем статистику
+    stats = moderation_db['suggestion_stats']
+    stats['pending'] = len([s for s in moderation_db['moderation_queue'] if s['status'] == 'pending'])
+    
+    if status == 'approved':
+        stats['approved'] += 1
+    elif status == 'rejected':
+        stats['rejected'] += 1
+    
+    return save_moderation_db(moderation_db)
+
 def reset_user_progress(user_id, reset_type="full"):
     """Сброс прогресса пользователя"""
     users = load_users()
@@ -78,33 +113,14 @@ def reset_user_progress(user_id, reset_type="full"):
     
     return save_users(users)
 
-def get_pending_suggestions():
-    """Получить ожидающие предложения"""
-    moderation_db = load_moderation_db()
-    return [s for s in moderation_db.get('moderation_queue', []) if s['status'] == 'pending']
+def get_user_by_id(user_id):
+    """Найти пользователя по ID"""
+    users = load_users()
+    return users.get(str(user_id))
 
-def update_suggestion_status(suggestion_id, status, moderator_id, response=None):
-    """Обновить статус предложения"""
-    moderation_db = load_moderation_db()
-    
-    for suggestion in moderation_db['moderation_queue']:
-        if suggestion['id'] == suggestion_id:
-            suggestion['status'] = status
-            suggestion['moderator_id'] = moderator_id
-            suggestion['response'] = response
-            suggestion['processed_date'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            break
-    
-    # Обновляем статистику
-    stats = moderation_db['suggestion_stats']
-    stats['pending'] = len([s for s in moderation_db['moderation_queue'] if s['status'] == 'pending'])
-    
-    if status == 'approved':
-        stats['approved'] += 1
-    elif status == 'rejected':
-        stats['rejected'] += 1
-    
-    return save_moderation_db(moderation_db)
+def get_all_users():
+    """Получить всех пользователей"""
+    return load_users()
 
 @moderator_bot.message_handler(commands=['start'])
 def moderator_start(message):
@@ -115,6 +131,7 @@ def moderator_start(message):
     
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton('📋 Очередь предложений', callback_data='mod_queue'))
+    markup.add(types.InlineKeyboardButton('📜 История предложений', callback_data='mod_history'))
     markup.add(types.InlineKeyboardButton('📊 Статистика', callback_data='mod_stats'))
     markup.add(types.InlineKeyboardButton('👤 Управление пользователями', callback_data='mod_users'))
     
@@ -135,6 +152,8 @@ def handle_moderator_actions(call):
     
     if call.data == 'mod_queue':
         show_moderation_queue(call.message.chat.id, call.message.message_id)
+    elif call.data == 'mod_history':
+        show_suggestion_history(call.message.chat.id, call.message.message_id)
     elif call.data == 'mod_stats':
         show_moderation_stats(call.message.chat.id, call.message.message_id)
     elif call.data == 'mod_users':
@@ -154,7 +173,7 @@ def show_moderation_queue(chat_id, message_id=None):
     else:
         text = f"📋 <b>Очередь предложений</b>\n\nОжидают рассмотрения: {len(pending_suggestions)}\n\n"
         
-        for i, suggestion in enumerate(pending_suggestions[:5]):  # Показываем первые 5
+        for i, suggestion in enumerate(pending_suggestions[:5]):
             text += f"{i+1}. 👤 {suggestion['user_data']['first_name']}\n"
             text += f"   💬 {suggestion['content'][:50]}...\n"
             text += f"   ⏰ {suggestion['timestamp']}\n\n"
@@ -162,10 +181,122 @@ def show_moderation_queue(chat_id, message_id=None):
     markup = types.InlineKeyboardMarkup()
     if pending_suggestions:
         markup.add(types.InlineKeyboardButton('👀 Просмотреть предложения', callback_data='view_suggestions'))
+    markup.add(types.InlineKeyboardButton('📜 История предложений', callback_data='mod_history'))
     markup.add(types.InlineKeyboardButton('🔄 Обновить', callback_data='mod_queue'))
     markup.add(types.InlineKeyboardButton('🏠 Главное меню', callback_data='mod_main'))
     
     moderator_bot.send_message(chat_id, text, reply_markup=markup, parse_mode='HTML')
+
+def show_suggestion_history(chat_id, message_id=None):
+    """Показать историю предложений"""
+    if message_id:
+        moderator_bot.delete_message(chat_id, message_id)
+    
+    processed_suggestions = get_processed_suggestions(10)
+    
+    if not processed_suggestions:
+        text = "📜 <b>История предложений</b>\n\nНет обработанных предложений."
+    else:
+        text = "📜 <b>История предложений</b>\n\n"
+        
+        for i, suggestion in enumerate(processed_suggestions):
+            status_emoji = "✅" if suggestion['status'] == 'approved' else "❌"
+            text += f"{i+1}. {status_emoji} {suggestion['user_data']['first_name']}\n"
+            text += f"   💬 {suggestion['content'][:50]}...\n"
+            text += f"   ⏰ {suggestion['timestamp']}\n\n"
+    
+    markup = types.InlineKeyboardMarkup()
+    if processed_suggestions:
+        markup.add(types.InlineKeyboardButton('📋 Подробная история', callback_data='view_detailed_history'))
+    markup.add(types.InlineKeyboardButton('📋 Текущая очередь', callback_data='mod_queue'))
+    markup.add(types.InlineKeyboardButton('🔄 Обновить', callback_data='mod_history'))
+    markup.add(types.InlineKeyboardButton('🏠 Главное меню', callback_data='mod_main'))
+    
+    moderator_bot.send_message(chat_id, text, reply_markup=markup, parse_mode='HTML')
+
+@moderator_bot.callback_query_handler(func=lambda call: call.data == 'view_detailed_history')
+def view_detailed_history(call):
+    """Просмотр детальной истории"""
+    if not is_moderator(call.message.chat.id):
+        moderator_bot.answer_callback_query(call.id, "❌ Нет прав доступа")
+        return
+    
+    processed_suggestions = get_processed_suggestions(20)
+    
+    if not processed_suggestions:
+        moderator_bot.answer_callback_query(call.id, "❌ Нет истории предложений")
+        return
+    
+    show_detailed_suggestion(call.message.chat.id, call.message.message_id, processed_suggestions[0], 0)
+
+def show_detailed_suggestion(chat_id, message_id, suggestion, index):
+    """Показать детали обработанного предложения"""
+    if message_id:
+        moderator_bot.delete_message(chat_id, message_id)
+    
+    processed_suggestions = get_processed_suggestions(20)
+    
+    status_text = "✅ Одобрено" if suggestion['status'] == 'approved' else "❌ Отклонено"
+    moderator_info = f"Модератор: {suggestion.get('moderator_id', 'Неизвестно')}"
+    processed_date = suggestion.get('processed_date', 'Не указано')
+    
+    text = (
+        f"📜 <b>История предложений</b> ({index + 1}/{len(processed_suggestions)})\n\n"
+        f"👤 <b>Пользователь:</b> {suggestion['user_data']['first_name']}\n"
+        f"📛 <b>Username:</b> @{suggestion['user_data']['username'] or 'нет'}\n"
+        f"🆔 <b>ID:</b> {suggestion['user_id']}\n"
+        f"⏰ <b>Отправлено:</b> {suggestion['timestamp']}\n"
+        f"📊 <b>Статус:</b> {status_text}\n"
+        f"👨‍💼 <b>{moderator_info}</b>\n"
+        f"⏱ <b>Обработано:</b> {processed_date}\n\n"
+        f"💬 <b>Текст предложения:</b>\n{suggestion['content']}\n"
+    )
+    
+    if suggestion.get('response'):
+        text += f"\n💭 <b>Ответ модератора:</b>\n{suggestion['response']}\n"
+    
+    markup = types.InlineKeyboardMarkup()
+    
+    # Кнопки навигации
+    nav_buttons = []
+    if index > 0:
+        nav_buttons.append(types.InlineKeyboardButton('⬅️ Предыдущее', callback_data=f'history_prev_{index}'))
+    if index < len(processed_suggestions) - 1:
+        nav_buttons.append(types.InlineKeyboardButton('➡️ Следующее', callback_data=f'history_next_{index}'))
+    
+    if nav_buttons:
+        markup.row(*nav_buttons)
+    
+    markup.add(types.InlineKeyboardButton('📜 Назад к истории', callback_data='mod_history'))
+    markup.add(types.InlineKeyboardButton('🏠 Главное меню', callback_data='mod_main'))
+    
+    moderator_bot.send_message(chat_id, text, reply_markup=markup, parse_mode='HTML')
+
+@moderator_bot.callback_query_handler(func=lambda call: call.data.startswith(('history_prev_', 'history_next_')))
+def handle_history_navigation(call):
+    """Навигация по истории"""
+    if not is_moderator(call.message.chat.id):
+        moderator_bot.answer_callback_query(call.id, "❌ Нет прав доступа")
+        return
+    
+    action, index = call.data.split('_', 2)
+    current_index = int(index)
+    
+    processed_suggestions = get_processed_suggestions(20)
+    
+    if not processed_suggestions:
+        moderator_bot.answer_callback_query(call.id, "❌ Нет истории")
+        return
+    
+    if action == 'prev' and current_index > 0:
+        new_index = current_index - 1
+    elif action == 'next' and current_index < len(processed_suggestions) - 1:
+        new_index = current_index + 1
+    else:
+        moderator_bot.answer_callback_query(call.id, "❌ Достигнут предел")
+        return
+    
+    show_detailed_suggestion(call.message.chat.id, call.message.message_id, processed_suggestions[new_index], new_index)
 
 def show_moderation_stats(chat_id, message_id=None):
     """Показать статистику модерации"""
@@ -194,7 +325,7 @@ def show_user_management(chat_id, message_id=None):
     if message_id:
         moderator_bot.delete_message(chat_id, message_id)
     
-    users = load_users()
+    users = get_all_users()
     
     text = (
         "👤 <b>Управление пользователями</b>\n\n"
@@ -204,13 +335,13 @@ def show_user_management(chat_id, message_id=None):
     
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton('📋 Список пользователей', callback_data='user_list'))
-    markup.add(types.InlineKeyboardButton('🔍 Поиск пользователя', callback_data='user_search'))
+    markup.add(types.InlineKeyboardButton('🔍 Поиск пользователя по ID', callback_data='user_search'))
     markup.add(types.InlineKeyboardButton('🔄 Обновить', callback_data='mod_users'))
     markup.add(types.InlineKeyboardButton('🏠 Главное меню', callback_data='mod_main'))
     
     moderator_bot.send_message(chat_id, text, reply_markup=markup, parse_mode='HTML')
 
-# Новые функции для работы с предложениями
+# Функции для работы с предложениями (из предыдущей версии)
 @moderator_bot.callback_query_handler(func=lambda call: call.data == 'view_suggestions')
 def view_suggestions(call):
     """Просмотр предложений"""
@@ -225,17 +356,19 @@ def view_suggestions(call):
         return
     
     # Показываем первое предложение
-    show_suggestion_detail(call.message.chat.id, call.message.message_id, pending_suggestions[0])
+    show_suggestion_detail(call.message.chat.id, call.message.message_id, pending_suggestions[0], 0)
 
-def show_suggestion_detail(chat_id, message_id, suggestion):
+def show_suggestion_detail(chat_id, message_id, suggestion, index):
     """Показать детали предложения"""
     if message_id:
         moderator_bot.delete_message(chat_id, message_id)
     
+    pending_suggestions = get_pending_suggestions()
+    
     text = (
-        f"📋 <b>Предложение от пользователя</b>\n\n"
+        f"📋 <b>Предложение {index + 1} из {len(pending_suggestions)}</b>\n\n"
         f"👤 <b>Пользователь:</b> {suggestion['user_data']['first_name']}\n"
-        f"📛 <b>Username:</b> @{suggestion['user_data']['username']}\n"
+        f"📛 <b>Username:</b> @{suggestion['user_data']['username'] or 'нет'}\n"
         f"🆔 <b>ID:</b> {suggestion['user_id']}\n"
         f"⏰ <b>Время:</b> {suggestion['timestamp']}\n\n"
         f"💬 <b>Текст предложения:</b>\n{suggestion['content']}\n\n"
@@ -247,7 +380,17 @@ def show_suggestion_detail(chat_id, message_id, suggestion):
         types.InlineKeyboardButton('✅ Одобрить', callback_data=f'approve_{suggestion["id"]}'),
         types.InlineKeyboardButton('❌ Отклонить', callback_data=f'reject_{suggestion["id"]}')
     )
-    markup.add(types.InlineKeyboardButton('⏭ Следующее', callback_data='view_suggestions'))
+    
+    # Кнопки навигации
+    nav_buttons = []
+    if index > 0:
+        nav_buttons.append(types.InlineKeyboardButton('⬅️ Предыдущее', callback_data=f'prev_{index}'))
+    if index < len(pending_suggestions) - 1:
+        nav_buttons.append(types.InlineKeyboardButton('➡️ Следующее', callback_data=f'next_{index}'))
+    
+    if nav_buttons:
+        markup.row(*nav_buttons)
+    
     markup.add(types.InlineKeyboardButton('📋 Назад к очереди', callback_data='mod_queue'))
     
     moderator_bot.send_message(chat_id, text, reply_markup=markup, parse_mode='HTML')
@@ -283,9 +426,184 @@ def handle_suggestion_decision(call):
     # Показываем следующее предложение или возвращаем в очередь
     pending_suggestions = get_pending_suggestions()
     if pending_suggestions:
-        show_suggestion_detail(call.message.chat.id, call.message.message_id, pending_suggestions[0])
+        show_suggestion_detail(call.message.chat.id, call.message.message_id, pending_suggestions[0], 0)
     else:
         show_moderation_queue(call.message.chat.id, call.message.message_id)
+
+@moderator_bot.callback_query_handler(func=lambda call: call.data.startswith(('prev_', 'next_')))
+def handle_suggestion_navigation(call):
+    """Навигация по предложениям"""
+    if not is_moderator(call.message.chat.id):
+        moderator_bot.answer_callback_query(call.id, "❌ Нет прав доступа")
+        return
+    
+    action, index = call.data.split('_', 1)
+    current_index = int(index)
+    
+    pending_suggestions = get_pending_suggestions()
+    
+    if not pending_suggestions:
+        moderator_bot.answer_callback_query(call.id, "❌ Нет предложений")
+        return
+    
+    if action == 'prev' and current_index > 0:
+        new_index = current_index - 1
+    elif action == 'next' and current_index < len(pending_suggestions) - 1:
+        new_index = current_index + 1
+    else:
+        moderator_bot.answer_callback_query(call.id, "❌ Достигнут предел")
+        return
+    
+    show_suggestion_detail(call.message.chat.id, call.message.message_id, pending_suggestions[new_index], new_index)
+
+@moderator_bot.callback_query_handler(func=lambda call: call.data == 'user_list')
+def show_user_list(call):
+    """Показать список пользователей"""
+    if not is_moderator(call.message.chat.id):
+        moderator_bot.answer_callback_query(call.id, "❌ Нет прав доступа")
+        return
+    
+    users = get_all_users()
+    
+    if not users:
+        moderator_bot.send_message(call.message.chat.id, "❌ Нет зарегистрированных пользователей.")
+        return
+    
+    # Показываем первого пользователя
+    user_ids = list(users.keys())
+    show_user_detail(call.message.chat.id, call.message.message_id, users[user_ids[0]], user_ids[0], 0, user_ids)
+
+def show_user_detail(chat_id, message_id, user, user_id, index, user_ids):
+    """Показать детали пользователя"""
+    if message_id:
+        moderator_bot.delete_message(chat_id, message_id)
+    
+    text = (
+        f"👤 <b>Пользователь {index + 1}/{len(user_ids)}</b>\n\n"
+        f"🆔 <b>ID:</b> {user_id}\n"
+        f"👨‍💼 <b>Имя:</b> {user['first_name']}\n"
+        f"📛 <b>Username:</b> @{user['username'] or 'нет'}\n"
+        f"📅 <b>Зарегистрирован:</b> {user['joined_date']}\n"
+        f"🏆 <b>Очки:</b> {user['total_points']}\n"
+        f"📚 <b>Статей прочитано:</b> {user['stats']['articles_read']}\n"
+        f"🧠 <b>Тестов пройдено:</b> {user['stats']['quizzes_taken']}\n"
+        f"📈 <b>Средний балл:</b> {user['stats']['average_score']}%\n"
+        f"🌍 <b>Изучаемые языки:</b> {', '.join(user['stats']['languages_learned']) if user['stats']['languages_learned'] else 'нет'}\n"
+    )
+    
+    markup = types.InlineKeyboardMarkup()
+    
+    # Кнопки сброса прогресса
+    markup.row(
+        types.InlineKeyboardButton('🔄 Полный сброс', callback_data=f'reset_full_{user_id}'),
+        types.InlineKeyboardButton('📚 Сброс статей', callback_data=f'reset_articles_{user_id}')
+    )
+    markup.row(
+        types.InlineKeyboardButton('🧠 Сброс тестов', callback_data=f'reset_quizzes_{user_id}'),
+        types.InlineKeyboardButton('⭐ Сброс очков', callback_data=f'reset_points_{user_id}')
+    )
+    
+    # Кнопки навигации
+    nav_buttons = []
+    if index > 0:
+        nav_buttons.append(types.InlineKeyboardButton('⬅️ Предыдущий', callback_data=f'user_prev_{index}'))
+    if index < len(user_ids) - 1:
+        nav_buttons.append(types.InlineKeyboardButton('➡️ Следующий', callback_data=f'user_next_{index}'))
+    
+    if nav_buttons:
+        markup.row(*nav_buttons)
+    
+    markup.add(types.InlineKeyboardButton('📋 Назад к списку', callback_data='mod_users'))
+    markup.add(types.InlineKeyboardButton('🏠 Главное меню', callback_data='mod_main'))
+    
+    moderator_bot.send_message(chat_id, text, reply_markup=markup, parse_mode='HTML')
+
+@moderator_bot.callback_query_handler(func=lambda call: call.data.startswith(('user_prev_', 'user_next_')))
+def handle_user_navigation(call):
+    """Навигация по пользователям"""
+    if not is_moderator(call.message.chat.id):
+        moderator_bot.answer_callback_query(call.id, "❌ Нет прав доступа")
+        return
+    
+    parts = call.data.split('_')
+    action = parts[1]
+    current_index = int(parts[2])
+    
+    users = get_all_users()
+    user_ids = list(users.keys())
+    
+    if not user_ids:
+        moderator_bot.answer_callback_query(call.id, "❌ Нет пользователей")
+        return
+    
+    if action == 'prev' and current_index > 0:
+        new_index = current_index - 1
+    elif action == 'next' and current_index < len(user_ids) - 1:
+        new_index = current_index + 1
+    else:
+        moderator_bot.answer_callback_query(call.id, "❌ Достигнут предел")
+        return
+    
+    show_user_detail(call.message.chat.id, call.message.message_id, users[user_ids[new_index]], user_ids[new_index], new_index, user_ids)
+
+@moderator_bot.callback_query_handler(func=lambda call: call.data.startswith('reset_'))
+def handle_reset_progress(call):
+    """Обработка сброса прогресса"""
+    if not is_moderator(call.message.chat.id):
+        moderator_bot.answer_callback_query(call.id, "❌ Нет прав доступа")
+        return
+    
+    parts = call.data.split('_')
+    reset_type = parts[1]
+    user_id = parts[2]
+    
+    reset_types = {
+        'full': 'полный сброс прогресса',
+        'articles': 'сброс прочитанных статей', 
+        'quizzes': 'сброс результатов тестов',
+        'points': 'обнуление очков'
+    }
+    
+    success = reset_user_progress(int(user_id), reset_type)
+    
+    if success:
+        moderator_bot.answer_callback_query(call.id, f"✅ {reset_types[reset_type]} выполнен")
+        
+        # Обновляем информацию о пользователе
+        users = get_all_users()
+        user_ids = list(users.keys())
+        current_index = user_ids.index(user_id) if user_id in user_ids else 0
+        
+        if user_id in users:
+            show_user_detail(call.message.chat.id, call.message.message_id, users[user_id], user_id, current_index, user_ids)
+    else:
+        moderator_bot.answer_callback_query(call.id, "❌ Ошибка при сбросе прогресса")
+
+@moderator_bot.callback_query_handler(func=lambda call: call.data == 'user_search')
+def ask_user_id_for_search(call):
+    """Запросить ID пользователя для поиска"""
+    if not is_moderator(call.message.chat.id):
+        moderator_bot.answer_callback_query(call.id, "❌ Нет прав доступа")
+        return
+    
+    msg = moderator_bot.send_message(call.message.chat.id, "🔍 Введите ID пользователя для поиска:")
+    moderator_bot.register_next_step_handler(msg, process_user_search)
+
+def process_user_search(message):
+    """Обработать поиск пользователя"""
+    try:
+        user_id = int(message.text)
+        user = get_user_by_id(user_id)
+        
+        if user:
+            users = get_all_users()
+            user_ids = list(users.keys())
+            index = user_ids.index(str(user_id)) if str(user_id) in user_ids else 0
+            show_user_detail(message.chat.id, None, user, str(user_id), index, user_ids)
+        else:
+            moderator_bot.send_message(message.chat.id, "❌ Пользователь с таким ID не найден.")
+    except ValueError:
+        moderator_bot.send_message(message.chat.id, "❌ Неверный формат ID. Введите числовой ID.")
 
 if __name__ == '__main__':
     print("Бот-модератор запущен...")

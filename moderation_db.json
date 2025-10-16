@@ -1,28 +1,43 @@
 {
   "moderation_queue": [
     {
-      "id": "830230755_1760561530",
+      "id": "830230755_1760605215",
       "type": "suggestion",
       "user_id": 830230755,
       "user_data": {
         "username": "I_KoKoSi",
         "first_name": "Владислав"
       },
-      "content": "Привет",
-      "timestamp": "2025-10-15 23:52:10",
+      "content": "Ky",
+      "timestamp": "2025-10-16 12:00:15",
       "status": "approved",
       "moderator_id": 830230755,
       "response": null,
-      "processed_date": "2025-10-15 23:53:40"
+      "processed_date": "2025-10-16 12:00:54"
+    },
+    {
+      "id": "830230755_1760605698",
+      "type": "suggestion",
+      "user_id": 830230755,
+      "user_data": {
+        "username": "I_KoKoSi",
+        "first_name": "Владислав"
+      },
+      "content": "Go",
+      "timestamp": "2025-10-16 12:08:18",
+      "status": "rejected",
+      "moderator_id": 830230755,
+      "response": null,
+      "processed_date": "2025-10-16 12:09:00"
     }
   ],
   "moderators": [
     830230755
   ],
   "suggestion_stats": {
-    "total": 1,
+    "total": 2,
     "approved": 1,
-    "rejected": 0,
+    "rejected": 1,
     "pending": 0
   }
 }

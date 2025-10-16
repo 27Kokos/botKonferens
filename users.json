@@ -4,49 +4,18 @@
     "username": "I_KoKoSi",
     "first_name": "Владислав",
     "joined_date": "2024-01-15",
-    "total_points": 125,
+    "total_points": 0,
     "progress": {
-      "articles_viewed": {
-        "VBA": [
-          "data_types",
-          "input_output",
-          "functions"
-        ],
-        "C": [
-          "input_output",
-          "functions",
-          "data_types"
-        ],
-        "Bash": [
-          "functions"
-        ]
-      },
-      "quizzes_completed": {
-        "VBA_basic": {
-          "score": 20,
-          "max_score": 20,
-          "date": "2025-10-15 19:27:44"
-        },
-        "Python_basic": {
-          "score": 10,
-          "max_score": 10,
-          "date": "2025-10-15 19:30:05"
-        }
-      },
-      "achievements": [
-        "perfect_score"
-      ]
+      "articles_viewed": {},
+      "quizzes_completed": {},
+      "achievements": []
     },
     "stats": {
-      "quizzes_taken": 4,
-      "articles_read": 7,
-      "average_score": 100.0,
+      "quizzes_taken": 0,
+      "articles_read": 0,
+      "average_score": 0,
       "total_reading_time": 650,
-      "languages_learned": [
-        "VBA",
-        "C",
-        "Bash"
-      ]
+      "languages_learned": []
     }
   },
   "1823137308": {
@@ -54,24 +23,18 @@
     "username": "без username",
     "first_name": "𝓥",
     "joined_date": "2025-10-15",
-    "total_points": 10,
+    "total_points": 0,
     "progress": {
-      "articles_viewed": {
-        "VBA": [
-          "data_types"
-        ]
-      },
+      "articles_viewed": {},
       "quizzes_completed": {},
       "achievements": []
     },
     "stats": {
       "quizzes_taken": 0,
-      "articles_read": 1,
+      "articles_read": 0,
       "average_score": 0,
       "total_reading_time": 0,
-      "languages_learned": [
-        "VBA"
-      ]
+      "languages_learned": []
     }
   }
 }
