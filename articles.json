@@ -115,4 +115,33 @@
       "estimated_time": "10 минут"
     }
   }
+  "JavaScript": {
+    "data_types": {
+      "id": "js_data_types",
+      "title": "Типы данных в JavaScript",
+      "url": "https://telegra.ph/Tipy-dannyh-JS-10-12",
+      "description": "Базовые типы данных и их применение в JavaScript",
+      "difficulty": "beginner",
+      "points": 10,
+      "estimated_time": "5 минут"
+    },
+    "input_output": {
+      "id": "js_input_output",
+      "title": "Ввод и вывод данных в JavaScript",
+      "url": "https://telegra.ph/Vvod-i-vyvod-dannyh-10-17",
+      "description": "Основы работы с вводом и выводом (статья-ссылка, предоставленная вами)",
+      "difficulty": "beginner",
+      "points": 15,
+      "estimated_time": "7 минут"
+    },
+    "functions": {
+      "id": "js_functions",
+      "title": "Функции в JavaScript",
+      "url": "https://telegra.ph/Funkcii-10-17",
+      "description": "Объявление, параметры, замыкания, декораторы",
+      "difficulty": "intermediate",
+      "points": 20,
+      "estimated_time": "10 минут"
+    }
+  }
 }
