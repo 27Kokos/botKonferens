@@ -1,13 +1,22 @@
 {
   "ranking": [
     {
+      "user_id": 894272011,
+      "username": "wessssaaassss",
+      "first_name": "даня",
+      "total_points": 150,
+      "quizzes_taken": 4,
+      "articles_read": 0,
+      "rank": 1
+    },
+    {
       "user_id": 830230755,
       "username": "I_KoKoSi",
       "first_name": "Владислав",
       "total_points": 0,
       "quizzes_taken": 0,
       "articles_read": 0,
-      "rank": 1
+      "rank": 2
     },
     {
       "user_id": 1823137308,
@@ -16,8 +25,8 @@
       "total_points": 0,
       "quizzes_taken": 0,
       "articles_read": 0,
-      "rank": 2
+      "rank": 3
     }
   ],
-  "last_updated": "2025-10-16 13:28:51"
+  "last_updated": "2025-10-22 16:01:51"
 }

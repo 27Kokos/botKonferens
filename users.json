@@ -42,16 +42,34 @@
     "username": "wessssaaassss",
     "first_name": "даня",
     "joined_date": "2025-10-16",
-    "total_points": 0,
+    "total_points": 150,
     "progress": {
       "articles_viewed": {},
-      "quizzes_completed": {},
-      "achievements": []
+      "quizzes_completed": {
+        "JavaScript_basic": {
+          "score": 0,
+          "max_score": 10,
+          "date": "2025-10-22 15:13:36"
+        },
+        "VBA_basic": {
+          "score": 20,
+          "max_score": 100,
+          "date": "2025-10-22 15:53:13"
+        },
+        "Bash_basic": {
+          "score": 40,
+          "max_score": 100,
+          "date": "2025-10-22 16:01:21"
+        }
+      },
+      "achievements": [
+        "first_quiz"
+      ]
     },
     "stats": {
-      "quizzes_taken": 0,
+      "quizzes_taken": 4,
       "articles_read": 0,
-      "average_score": 0,
+      "average_score": 28.57,
       "total_reading_time": 0,
       "languages_learned": []
     }
