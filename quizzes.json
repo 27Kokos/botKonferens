@@ -172,6 +172,132 @@
         "correct_answer": 1,
         "points": 10,
         "explanation": "В языке C для вывода используется функция printf()"
+      },
+            {
+        "question_id": 2,
+        "question_text": "В языке C тип int обычно используется для …",
+        "question_type": "single_choice",
+        "options": [
+          "чисел с дробной частью",
+          "целых чисел без дробной части",
+          "символов",
+          "логических значений"
+        ],
+        "correct_answer": 0,
+        "points": 10,
+        "explanation": "целых чисел без дробной части"
+      },
+            {
+        "question_id": 3,
+        "question_text": "Тип double отличается от float тем, что …",
+        "question_type": "single_choice",
+        "options": [
+          "занимает меньше памяти",
+          "поддерживает целые числа только",
+          "хранит числа с плавающей точкой с большей точностью",
+          "используется только для символов"
+        ],
+        "correct_answer": 2,
+        "points": 10,
+        "explanation": "хранит числа с плавающей точкой с большей точностью"
+      },
+            {
+        "question_id": 4,
+        "question_text": "В статье сказано, что библиотека <stdio.h> содержит функции …",
+        "question_type": "single_choice",
+        "options": [
+          "malloc() и free()",
+          "printf() и scanf()",
+          "main() и return()",
+          "strlen() и strcpy()"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "printf() и scanf()"
+      },
+            {
+        "question_id": 5,
+        "question_text": "Синтаксис вызова функции scanf() включает …",
+        "question_type": "single_choice",
+        "options": [
+          "название файла, формат и имя переменной",
+          "строку формата и адрес(а) переменной(ых)",
+          "только имя переменной",
+          "только строку формата"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "строку формата и адрес(а) переменной(ых)"
+      },
+            {
+        "question_id": 6,
+        "question_text": "Почему рекомендуется использовать функции в программе?",
+        "question_type": "single_choice",
+        "options": [
+          "Чтобы увеличить количество строк кода",
+          "Для повторного использования кода и улучшения структуры",
+          "Чтобы убрать параметры у функций",
+          "Чтобы всё было написано в main()"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "Для повторного использования кода и улучшения структуры"
+      },
+            {
+        "question_id": 7,
+        "question_text": "Что из перечисленного не является элементом объявления функции?",
+        "question_type": "single_choice",
+        "options": [
+          "имя функции",
+          "возвращаемый тип",
+          "параметры в круглых скобках",
+          "число строк в теле функции"
+        ],
+        "correct_answer": 3,
+        "points": 10,
+        "explanation": "число строк в теле функции"
+      },
+            {
+        "question_id": 8,
+        "question_text": "Какой возвращаемый тип функции означает, что функция ничего не возвращает?",
+        "question_type": "single_choice",
+        "options": [
+          "int",
+          "float",
+          "void",
+          "double"
+        ],
+        "correct_answer": 2,
+        "points": 10,
+        "explanation": "void"
+      },
+            {
+        "question_id": 9,
+        "question_text": "Какое утверждение верно относительно типа float?",
+        "question_type": "single_choice",
+        "options": [
+          "Он хранит примерно от −1.7×10^308 до 1.7×10^308",
+          "Он обычно занимает 8 байт",
+          "Он используется для чисел с плавающей точкой меньшей точности и обычно занимает 4 байта",
+          "Он используется только для целых чисел"
+        ],
+        "correct_answer": 2,
+        "points": 10,
+        "explanation": "Он используется для чисел с плавающей точкой меньшей точности и обычно занимает 4 байта"
+      },
+            {
+        "question_id": 10,
+        "question_text": "Что такое рекурсия в контексте функций?",
+        "question_type": "single_choice",
+        "options": [
+          "Функция без параметров",
+          "Функция, которая вызывает саму себя",
+          "Функция, которая не имеет возвращаемого типа",
+          "Функция, которая содержит только один оператор"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "Функция, которая вызывает саму себя"
       }
     ],
     "total_points": 10,
@@ -347,9 +473,127 @@
           "console.log('Hello')",
           "System.out.println('Hello')"
         ],
-        "correct_answer": 0,
+        "correct_answer": 1,
         "points": 10,
         "explanation": "В Python для вывода используется функция print()"
+      },
+            {
+        "question_id": 2,
+        "question_text": "Что произойдёт, если функция объявлена без оператора return",
+        "question_type": "single_choice",
+        "options": [
+          "Ничего не возвращается — вызов функции выдаст ошибку.",
+          "Функция вернёт значение None.",
+          "Функция вернёт пустую строку ' '.",
+          "Функция вернёт «0»."
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "Функция вернёт значение None."
+      },      {
+        "question_id": 3,
+        "question_text": "Какой из типов данных в Python является неизменяемым (immutable)?",
+        "question_type": "single_choice",
+        "options": [
+          "list",
+          "tuple",
+          "console.log('Hello')",
+          "set"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "tuple"
+      },      {
+        "question_id": 4,
+        "question_text": "Какой аргумент используется в функции print() для указания разделителя между аргументами?",
+        "question_type": "single_choice",
+        "options": [
+          "sep",
+          "end",
+          "delimiter",
+          "separator"
+        ],
+        "correct_answer": 0,
+        "points": 10,
+        "explanation": "sep"
+      },      {
+        "question_id": 5,
+        "question_text": "При объявлении функции с аргументом по умолчанию стоит избегать использования…",
+        "question_type": "single_choice",
+        "options": [
+          "неизменяемых объектов, например None",
+          "изменений пространства имён внутри функции",
+          "изменяемых объектов, например списка [] или словаря {}",
+          "использования return"
+        ],
+        "correct_answer": 2,
+        "points": 10,
+        "explanation": "изменяемых объектов, например списка [] или словаря {}"
+      },      {
+        "question_id": 6,
+        "question_text": "Какой тип данных используют для представления “логического” значения True или False в Python?",
+        "question_type": "single_choice",
+        "options": [
+          "int",
+          "bool",
+          "NoneType",
+          "str"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "bool"
+      },      {
+        "question_id": 7,
+        "question_text": "Что вернёт функция input()",
+        "question_type": "single_choice",
+        "options": [
+          "Число int, если введено число",
+          "Вещественное число float, если введено число с точкой",
+          "Всегда строку str",
+          "None, если ничего не введено"
+        ],
+        "correct_answer": 2,
+        "points": 10,
+        "explanation": "Всегда строку str"
+      },      {
+        "question_id": 8,
+        "question_text": "Что такое декоратор функции в Python?",
+        "question_type": "single_choice",
+        "options": [
+          "Функция, которая вызывается только внутри цикла",
+          "Функция, которая принимает другую функцию и возвращает «обёрнутую» функцию",
+          "Специальный класс, который наследует функции",
+          "Аргумент функции, передаваемый через *args"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "Функция, которая принимает другую функцию и возвращает «обёрнутую» функцию"
+      },      {
+        "question_id": 9,
+        "question_text": "Какой из следующих типов данных предназначен для работы с бинарными данными (не текстом)?",
+        "question_type": "single_choice",
+        "options": [
+          "str",
+          "bytes",
+          "list",
+          "complex"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "bytes"
+      },      {
+        "question_id": 10,
+        "question_text": "Если вы хотите сделать функцию «чистой» (pure) и удобной для тестирования, что стоит избегать?",
+        "question_type": "single_choice",
+        "options": [
+          "Явно передавать аргументы и возвращать результат",
+          "Иметь скрытые побочные эффекты (например, изменение глобальной переменной)",
+          "Разделять ввод-вывод и вычислительную логику",
+          "Делить логически большие функции на более мелкие"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "Иметь скрытые побочные эффекты (например, изменение глобальной переменной)"
       }
     ],
     "total_points": 10,
@@ -376,6 +620,284 @@
         "correct_answer": 0,
         "points": 10,
         "explanation": "В современном JavaScript рекомендуется использовать let или const"
+      },
+            {
+        "question_id": 2,
+        "question_text": "Какой тип данных в JavaScript используется для целых чисел произвольно большой длины (больше безопасного диапазона ±(2⁵³-1))?",
+        "question_type": "single_choice",
+        "options": [
+          "number",
+          "bigint",
+          "symbol",
+          "object"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "bigint"
+      },
+            {
+        "question_id": 3,
+        "question_text": "Что вернёт выражение typeof null в JavaScript?",
+        "question_type": "single_choice",
+        "options": [
+          "null",
+          "undefined",
+          "object",
+          "number"
+        ],
+        "correct_answer": 2,
+        "points": 10,
+        "explanation": "object"
+      },
+            {
+        "question_id": 4,
+        "question_text": "Укажите, какая из встроенных функций отображает модальное окно с полем для ввода текста и возвращает либо введённую строку, либо null, если ввод отменён?",
+        "question_type": "single_choice",
+        "options": [
+          "alert()",
+          "confirm()",
+          "prompt()",
+          "console.log()"
+        ],
+        "correct_answer": 2,
+        "points": 10,
+        "explanation": "prompt()"
+      },
+            {
+        "question_id": 5,
+        "question_text": "Что выведет confirm('Выполнить действие?'), если пользователь нажмёт кнопку Отмена?",
+        "question_type": "single_choice",
+        "options": [
+          "undefined",
+          "false",
+          "null",
+          "true"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "false"
+      },
+            {
+        "question_id": 6,
+        "question_text": "При объявлении функции в JavaScript, что называют «параметром», а что — «аргументом»?",
+        "question_type": "single_choice",
+        "options": [
+          "Параметр — это значение, переданное функции; аргумент — имя переменной в объявлении.",
+          "Параметр — имя переменной в объявлении функции; аргумент — значение, переданное при вызове.",
+          "Параметр и аргумент — синонимы, нет различия.",
+          "Параметр — возвращаемое значение; аргумент — имя функции."
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "Параметр — имя переменной в объявлении функции; аргумент — значение, переданное при вызове."
+      },
+            {
+        "question_id": 7,
+        "question_text": "Что будет, если в функции есть несколько операторов return? Как будет работать функция?",
+        "question_type": "single_choice",
+        "options": [
+          "Все return выполнятся по порядку.",
+          "Первый достигнутый return завершит функцию и вернёт значение.",
+          "Последний return выполнится вне зависимости от расположения.",
+          "Ошибка компиляции."
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "Первый достигнутый return завершит функцию и вернёт значение."
+      },
+            {
+        "question_id": 8,
+        "question_text": "Какой из следующих типов данных НЕ является «примитивным» в JavaScript?",
+        "question_type": "single_choice",
+        "options": [
+          "string",
+          "boolean",
+          "object",
+          "symbol"
+        ],
+        "correct_answer": 2,
+        "points": 10,
+        "explanation": "object"
+      },
+            {
+        "question_id": 9,
+        "question_text": "Если переменная объявлена, но ей не было присвоено значение, что будет её значением?",
+        "question_type": "single_choice",
+        "options": [
+          "null",
+          "undefined",
+          "0",
+          "пустая строка"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "undefined"
+      },
+            {
+        "question_id": 10,
+        "question_text": "Можно ли при объявлении функции задать значение параметру по умолчанию? Если да — как это выглядит (пример)?",
+        "question_type": "single_choice",
+        "options": [
+          "Нет, нельзя.",
+          "Да — function f(a = 5) { … }",
+          "Да — function f(a ?: 5) { … }",
+          "Да — function f(default a = 5) { … }"
+        ],
+        "correct_answer": 3,
+        "points": 10,
+        "explanation": "Да — function f(a = 5) { … }"
+      }
+    ],
+    "total_points": 10,
+    "passing_score": 6
+  },
+   "Big_Test": {
+    "quiz_id": "Big_Test",
+    "language": "Big_Test",
+    "title": "Большой Тест",
+    "description": "Большой Тест по базовому синтаксису",
+    "difficulty": "beginner",
+    "time_limit": 600,
+    "questions": [
+      {
+        "question_id": 1,
+        "question_text": "Какой результат даст код: print(type([1, 2, 3])) на Pyton?",
+        "question_type": "single_choice",
+        "options": [
+          "<class 'tuple'>",
+          "<class 'list'>",
+          "<class 'set'>",
+          "<class 'array'>"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "<class 'list'>"
+      },
+            {
+        "question_id": 2,
+        "question_text": "Что делает оператор return в функции Python?",
+        "question_type": "single_choice",
+        "options": [
+          "Прерывает цикл",
+          "Возвращает значение из функции",
+          "Выводит текст на экран",
+          "Завершает программу"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "Возвращает значение из функции"
+      },
+            {
+        "question_id": 3,
+        "question_text": "Какой тип данных возвращает выражение typeof null в JavaScript?",
+        "question_type": "single_choice",
+        "options": [
+          "object",
+          "null",
+          "undefined",
+          "number"
+        ],
+        "correct_answer": 0,
+        "points": 10,
+        "explanation": "object"
+      },
+            {
+        "question_id": 4,
+        "question_text": "Что делает функция parseInt(\"10.5\") в JavaScript?",
+        "question_type": "single_choice",
+        "options": [
+          "Возвращает 10",
+          "Возвращает 10.5",
+          "Возвращает строку \"10\" ",
+          "Ошибку"
+        ],
+        "correct_answer": 0,
+        "points": 10,
+        "explanation": "Возвращает 10"
+      },
+            {
+        "question_id": 5,
+        "question_text": "Какая функция используется для вывода текста на экран в C?",
+        "question_type": "single_choice",
+        "options": [
+          "print()",
+          "printf()",
+          "cout",
+          "System.out.println()"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "printf()"
+      },
+            {
+        "question_id": 6,
+        "question_text": "Что делает функция scanf() в C?",
+        "question_type": "single_choice",
+        "options": [
+          "Считывает данные с клавиатуры",
+          "Выводит текст",
+          "Завершает программу",
+          "Объявляет переменную"
+        ],
+        "correct_answer": 0,
+        "points": 10,
+        "explanation": "Считывает данные с клавиатуры"
+      },
+            {
+        "question_id": 7,
+        "question_text": "Как объявить переменную в VBA?",
+        "question_type": "single_choice",
+        "options": [
+          "var x As Integer",
+          "Dim x As Integer",
+          "let x = 0",
+          "int x = 0"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "Dim x As Integer"
+      },
+            {
+        "question_id": 8,
+        "question_text": "Какая функция в VBA используется для вывода сообщений пользователю?",
+        "question_type": "single_choice",
+        "options": [
+          "alert()",
+          "MsgBox()",
+          "Print()",
+          "Echo()"
+        ],
+        "correct_answer": 1,
+        "points": 10,
+        "explanation": "MsgBox()"
+      },
+            {
+        "question_id": 9,
+        "question_text": "Что делает функция InputBox() в VBA?",
+        "question_type": "single_choice",
+        "options": [
+          "Показывает окно для ввода данных",
+          "Считывает строку из файла",
+          "Выводит текст в консоль",
+          "Создаёт переменную"
+        ],
+        "correct_answer": 0,
+        "points": 10,
+        "explanation": "Показывает окно для ввода данных"
+      },
+            {
+        "question_id": 10,
+        "question_text": "Как считать ввод пользователя в переменную name в Bash?",
+        "question_type": "single_choice",
+        "options": [
+          "read -input name",
+          "input name",
+          "read name",
+          "scanf name"
+        ],
+        "correct_answer": 2,
+        "points": 10,
+        "explanation": "read name"
       }
     ],
     "total_points": 10,

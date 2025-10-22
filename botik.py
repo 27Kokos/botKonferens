@@ -662,6 +662,7 @@ def show_quiz_selection(chat_id, message_id):
     markup.add(types.InlineKeyboardButton('🧠 Bash - Основы', callback_data='quiz_Bash_basic'))
     markup.add(types.InlineKeyboardButton('🧠 Python - Основы', callback_data='quiz_Python_basic'))
     markup.add(types.InlineKeyboardButton('🧠 JavaScript - Основы', callback_data='quiz_JavaScript_basic'))
+    markup.add(types.InlineKeyboardButton('🧠 Тест по всем темам', callback_data='quiz_Big_Test'))
     markup.add(types.InlineKeyboardButton('📚 Изучать материалы', callback_data='languages'))
     markup.add(types.InlineKeyboardButton('🏠 В главное меню', callback_data='back_to_main'))
     

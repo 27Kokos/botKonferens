@@ -73,5 +73,24 @@
       "total_reading_time": 0,
       "languages_learned": []
     }
+  },
+  "717530242": {
+    "user_id": 717530242,
+    "username": "CodeForgeSPO_bot",
+    "first_name": "CodeForge",
+    "joined_date": "2025-10-22",
+    "total_points": 0,
+    "progress": {
+      "articles_viewed": {},
+      "quizzes_completed": {},
+      "achievements": []
+    },
+    "stats": {
+      "quizzes_taken": 0,
+      "articles_read": 0,
+      "average_score": 0,
+      "total_reading_time": 0,
+      "languages_learned": []
+    }
   }
 }
