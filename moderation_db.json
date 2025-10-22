@@ -29,6 +29,21 @@
       "moderator_id": 830230755,
       "response": null,
       "processed_date": "2025-10-16 12:09:00"
+    },
+    {
+      "id": "1823137308_1761146233",
+      "type": "suggestion",
+      "user_id": 1823137308,
+      "user_data": {
+        "username": null,
+        "first_name": "𝓥"
+      },
+      "content": "Ky",
+      "timestamp": "2025-10-22 18:17:13",
+      "status": "rejected",
+      "moderator_id": 830230755,
+      "response": null,
+      "processed_date": "2025-10-22 18:18:05"
     }
   ],
   "moderators": [
@@ -36,9 +51,9 @@
     894272011
   ],
   "suggestion_stats": {
-    "total": 2,
+    "total": 3,
     "approved": 1,
-    "rejected": 1,
+    "rejected": 2,
     "pending": 0
   }
 }
