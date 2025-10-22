@@ -1,41 +1,23 @@
 {
   "ranking": [
     {
-      "user_id": 894272011,
-      "username": "wessssaaassss",
-      "first_name": "даня",
-      "total_points": 150,
-      "quizzes_taken": 4,
-      "articles_read": 0,
+      "user_id": 1823137308,
+      "username": "sviisik",
+      "first_name": "𝓥",
+      "total_points": 225,
+      "quizzes_taken": 0,
+      "articles_read": 15,
       "rank": 1
     },
     {
       "user_id": 830230755,
       "username": "I_KoKoSi",
       "first_name": "Владислав",
-      "total_points": 0,
+      "total_points": 10,
       "quizzes_taken": 0,
-      "articles_read": 0,
+      "articles_read": 1,
       "rank": 2
-    },
-    {
-      "user_id": 1823137308,
-      "username": "без username",
-      "first_name": "𝓥",
-      "total_points": 0,
-      "quizzes_taken": 0,
-      "articles_read": 0,
-      "rank": 3
-    },
-    {
-      "user_id": 717530242,
-      "username": "CodeForgeSPO_bot",
-      "first_name": "CodeForge",
-      "total_points": 0,
-      "quizzes_taken": 0,
-      "articles_read": 0,
-      "rank": 4
     }
   ],
-  "last_updated": "2025-10-22 20:45:31"
+  "last_updated": "2025-10-23 00:20:11"
 }

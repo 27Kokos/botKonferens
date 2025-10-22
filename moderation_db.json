@@ -55,6 +55,21 @@
       },
       "content": "Артем давай работай, опять тесты сломались",
       "timestamp": "2025-10-22 20:45:28",
+      "status": "rejected",
+      "moderator_id": 830230755,
+      "response": null,
+      "processed_date": "2025-10-22 23:53:03"
+    },
+    {
+      "id": "1823137308_1761166849",
+      "type": "suggestion",
+      "user_id": 1823137308,
+      "user_data": {
+        "username": "sviisik",
+        "first_name": "𝓥"
+      },
+      "content": "Бя",
+      "timestamp": "2025-10-23 00:00:49",
       "status": "pending",
       "moderator_id": null,
       "response": null
@@ -65,9 +80,9 @@
     894272011
   ],
   "suggestion_stats": {
-    "total": 4,
+    "total": 5,
     "approved": 1,
-    "rejected": 2,
+    "rejected": 3,
     "pending": 1
   }
 }

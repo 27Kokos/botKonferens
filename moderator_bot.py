@@ -11,6 +11,7 @@ moderator_bot = telebot.TeleBot('8339489199:AAELTq_I7ge6_3p_GQ-IeZhT8liL47v7xaI'
 # Файлы данных
 MODERATION_DB_FILE = 'moderation_db.json'
 USERS_FILE = 'users.json'
+USER_STATES_FILE = 'user_states.json'
 
 def load_data(file_path):
     """Загрузка данных из JSON файла"""
@@ -44,6 +45,12 @@ def load_users():
 
 def save_users(data):
     return save_data(data, USERS_FILE)
+
+def load_user_states():
+    return load_data(USER_STATES_FILE)
+
+def save_user_states(data):
+    return save_data(data, USER_STATES_FILE)
 
 def is_moderator(user_id):
     """Проверка, является ли пользователь модератором"""
@@ -113,6 +120,35 @@ def reset_user_progress(user_id, reset_type="full"):
     
     return save_users(users)
 
+def reset_all_users_progress():
+    """Полный сброс статистики ВСЕХ пользователей"""
+    users = load_users()
+    
+    for user_id, user_data in users.items():
+        user_data['total_points'] = 0
+        user_data['progress']['articles_viewed'] = {}
+        user_data['progress']['quizzes_completed'] = {}
+        user_data['progress']['achievements'] = []
+        user_data['stats']['quizzes_taken'] = 0
+        user_data['stats']['articles_read'] = 0
+        user_data['stats']['average_score'] = 0
+        user_data['stats']['total_reading_time'] = 0
+        user_data['stats']['languages_learned'] = []
+    
+    return save_users(users)
+
+def delete_all_users():
+    """Удаление ВСЕХ пользователей"""
+    # Очищаем файл users.json
+    users = {}
+    users_saved = save_users(users)
+    
+    # Очищаем файл user_states.json
+    user_states = {}
+    states_saved = save_user_states(user_states)
+    
+    return users_saved and states_saved
+
 def get_user_by_id(user_id):
     """Найти пользователя по ID"""
     users = load_users()
@@ -134,6 +170,7 @@ def moderator_start(message):
     markup.add(types.InlineKeyboardButton('📜 История предложений', callback_data='mod_history'))
     markup.add(types.InlineKeyboardButton('📊 Статистика', callback_data='mod_stats'))
     markup.add(types.InlineKeyboardButton('👤 Управление пользователями', callback_data='mod_users'))
+    markup.add(types.InlineKeyboardButton('⚠️ Опасные действия', callback_data='danger_zone'))
     
     moderator_bot.send_message(
         message.chat.id,
@@ -160,6 +197,139 @@ def handle_moderator_actions(call):
         show_user_management(call.message.chat.id, call.message.message_id)
     elif call.data == 'mod_main':
         moderator_start(call.message)
+
+@moderator_bot.callback_query_handler(func=lambda call: call.data == 'danger_zone')
+def show_danger_zone(call):
+    """Показать опасные действия"""
+    if not is_moderator(call.message.chat.id):
+        moderator_bot.answer_callback_query(call.id, "❌ Нет прав доступа")
+        return
+    
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton('🔄 Сбросить статистику ВСЕХ пользователей', callback_data='reset_all_stats'))
+    markup.add(types.InlineKeyboardButton('🗑 Удалить ВСЕХ пользователей', callback_data='delete_all_users'))
+    markup.add(types.InlineKeyboardButton('🔙 Назад', callback_data='mod_main'))
+    
+    moderator_bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        text="⚠️ <b>Опасная зона</b>\n\n"
+             "Здесь находятся действия, которые влияют на ВСЕХ пользователей:\n\n"
+             "🔄 <b>Сброс статистики</b> - обнулит очки, прогресс и достижения у всех пользователей\n"
+             "🗑 <b>Удаление пользователей</b> - полностью очистит базу пользователей\n\n"
+             "<b>ВНИМАНИЕ:</b> Эти действия необратимы!",
+        reply_markup=markup,
+        parse_mode='HTML'
+    )
+
+@moderator_bot.callback_query_handler(func=lambda call: call.data == 'reset_all_stats')
+def handle_reset_all_stats(call):
+    """Обработка сброса статистики всех пользователей"""
+    if not is_moderator(call.message.chat.id):
+        moderator_bot.answer_callback_query(call.id, "❌ Нет прав доступа")
+        return
+    
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton('✅ Да, сбросить всю статистику', callback_data='confirm_reset_all'))
+    markup.add(types.InlineKeyboardButton('❌ Отмена', callback_data='danger_zone'))
+    
+    moderator_bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        text="⚠️ <b>Подтверждение сброса статистики</b>\n\n"
+             "Вы уверены, что хотите сбросить статистику ВСЕХ пользователей?\n\n"
+             "Это действие:\n"
+             "• Обнулит все очки\n"
+             "• Удалит весь прогресс по статьям\n"
+             "• Удалит все пройденные тесты\n"
+             "• Удалит все достижения\n"
+             "• Сбросит всю статистику\n\n"
+             "<b>Действие необратимо!</b>",
+        reply_markup=markup,
+        parse_mode='HTML'
+    )
+
+@moderator_bot.callback_query_handler(func=lambda call: call.data == 'confirm_reset_all')
+def confirm_reset_all_stats(call):
+    """Подтверждение сброса статистики всех пользователей"""
+    if not is_moderator(call.message.chat.id):
+        moderator_bot.answer_callback_query(call.id, "❌ Нет прав доступа")
+        return
+    
+    success = reset_all_users_progress()
+    
+    if success:
+        users_count = len(get_all_users())
+        text = f"✅ <b>Статистика сброшена!</b>\n\nСтатистика {users_count} пользователей была полностью обнулена."
+    else:
+        text = "❌ <b>Ошибка при сбросе статистики</b>"
+    
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton('🔙 Назад в опасную зону', callback_data='danger_zone'))
+    markup.add(types.InlineKeyboardButton('🏠 Главное меню', callback_data='mod_main'))
+    
+    moderator_bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        text=text,
+        reply_markup=markup,
+        parse_mode='HTML'
+    )
+
+@moderator_bot.callback_query_handler(func=lambda call: call.data == 'delete_all_users')
+def handle_delete_all_users(call):
+    """Обработка удаления всех пользователей"""
+    if not is_moderator(call.message.chat.id):
+        moderator_bot.answer_callback_query(call.id, "❌ Нет прав доступа")
+        return
+    
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton('✅ Да, удалить всех пользователей', callback_data='confirm_delete_all'))
+    markup.add(types.InlineKeyboardButton('❌ Отмена', callback_data='danger_zone'))
+    
+    users_count = len(get_all_users())
+    
+    moderator_bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        text=f"⚠️ <b>Подтверждение удаления пользователей</b>\n\n"
+             f"Вы уверены, что хотите удалить ВСЕХ пользователей?\n\n"
+             f"Это действие:\n"
+             f"• Удалит {users_count} пользователей\n"
+             f"• Очистит всю базу данных пользователей\n"
+             f"• Удалит все состояния пользователей\n"
+             f"• Пользователям придется регистрироваться заново\n\n"
+             f"<b>Действие необратимо!</b>",
+        reply_markup=markup,
+        parse_mode='HTML'
+    )
+
+@moderator_bot.callback_query_handler(func=lambda call: call.data == 'confirm_delete_all')
+def confirm_delete_all_users(call):
+    """Подтверждение удаления всех пользователей"""
+    if not is_moderator(call.message.chat.id):
+        moderator_bot.answer_callback_query(call.id, "❌ Нет прав доступа")
+        return
+    
+    users_count = len(get_all_users())
+    success = delete_all_users()
+    
+    if success:
+        text = f"✅ <b>Все пользователи удалены!</b>\n\nБыло удалено {users_count} пользователей. База данных очищена."
+    else:
+        text = "❌ <b>Ошибка при удалении пользователей</b>"
+    
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton('🔙 Назад в опасную зону', callback_data='danger_zone'))
+    markup.add(types.InlineKeyboardButton('🏠 Главное меню', callback_data='mod_main'))
+    
+    moderator_bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        text=text,
+        reply_markup=markup,
+        parse_mode='HTML'
+    )
 
 def show_moderation_queue(chat_id, message_id=None):
     """Показать очередь модерации"""
@@ -568,20 +738,18 @@ def handle_reset_progress(call):
     
     if success:
         moderator_bot.answer_callback_query(call.id, f"✅ {reset_types[reset_type]} выполнен")
-        
         # Обновляем информацию о пользователе
         users = get_all_users()
         user_ids = list(users.keys())
-        current_index = user_ids.index(user_id) if user_id in user_ids else 0
-        
         if user_id in users:
+            current_index = user_ids.index(user_id)
             show_user_detail(call.message.chat.id, call.message.message_id, users[user_id], user_id, current_index, user_ids)
     else:
         moderator_bot.answer_callback_query(call.id, "❌ Ошибка при сбросе прогресса")
 
 @moderator_bot.callback_query_handler(func=lambda call: call.data == 'user_search')
-def ask_user_id_for_search(call):
-    """Запросить ID пользователя для поиска"""
+def handle_user_search(call):
+    """Обработка поиска пользователя"""
     if not is_moderator(call.message.chat.id):
         moderator_bot.answer_callback_query(call.id, "❌ Нет прав доступа")
         return
@@ -590,21 +758,25 @@ def ask_user_id_for_search(call):
     moderator_bot.register_next_step_handler(msg, process_user_search)
 
 def process_user_search(message):
-    """Обработать поиск пользователя"""
+    """Обработка введенного ID пользователя"""
     try:
-        user_id = int(message.text)
-        user = get_user_by_id(user_id)
-        
-        if user:
-            users = get_all_users()
-            user_ids = list(users.keys())
-            index = user_ids.index(str(user_id)) if str(user_id) in user_ids else 0
-            show_user_detail(message.chat.id, None, user, str(user_id), index, user_ids)
-        else:
-            moderator_bot.send_message(message.chat.id, "❌ Пользователь с таким ID не найден.")
+        user_id = int(message.text.strip())
     except ValueError:
         moderator_bot.send_message(message.chat.id, "❌ Неверный формат ID. Введите числовой ID.")
+        return
+    
+    user = get_user_by_id(user_id)
+    if not user:
+        moderator_bot.send_message(message.chat.id, f"❌ Пользователь с ID {user_id} не найден.")
+        return
+    
+    # Показываем информацию о пользователе
+    users = get_all_users()
+    user_ids = list(users.keys())
+    if str(user_id) in user_ids:
+        index = user_ids.index(str(user_id))
+        show_user_detail(message.chat.id, None, user, str(user_id), index, user_ids)
 
-if __name__ == '__main__':
-    print("Бот-модератор запущен...")
+if __name__ == "__main__":
+    print("Модератор бот запущен...")
     moderator_bot.polling(none_stop=True)
