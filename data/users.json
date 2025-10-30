@@ -1,1 +1,40 @@
-{}
+{
+  "830230755": {
+    "user_id": 830230755,
+    "username": "I_KoKoSi",
+    "first_name": "Владислав",
+    "joined_date": "2025-10-30",
+    "total_points": 34,
+    "progress": {
+      "articles_viewed": {
+        "C": [
+          "functions"
+        ]
+      },
+      "quizzes_completed": {
+        "C_basic": {
+          "score": 7,
+          "max_score": 10,
+          "date": "2025-10-30 22:40:12"
+        },
+        "Big_Test": {
+          "score": 7,
+          "max_score": 10,
+          "date": "2025-10-30 22:41:20"
+        }
+      },
+      "achievements": [
+        "first_quiz"
+      ]
+    },
+    "stats": {
+      "quizzes_taken": 2,
+      "articles_read": 1,
+      "average_score": 70.0,
+      "total_reading_time": 0,
+      "languages_learned": [
+        "C"
+      ]
+    }
+  }
+}

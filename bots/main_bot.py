@@ -305,10 +305,17 @@ def send_quiz_question(chat_id):
         finish_quiz(chat_id)
         return
     q = quiz['questions'][index]
+    
+    # Экранируем HTML-сущности в тексте вопроса
+    question_text = html.escape(q['question_text'])
+    
     markup = types.InlineKeyboardMarkup()
     for i, opt in enumerate(q['options']):
-        markup.add(types.InlineKeyboardButton(opt, callback_data=f'answer_{index}_{i}'))
-    bot.send_message(chat_id, f"❓ <b>{q['question_text']}</b>", parse_mode='HTML', reply_markup=markup)
+        # Также экранируем варианты ответов
+        escaped_opt = html.escape(opt)
+        markup.add(types.InlineKeyboardButton(escaped_opt, callback_data=f'answer_{index}_{i}'))
+    
+    bot.send_message(chat_id, f"❓ <b>{question_text}</b>", parse_mode='HTML', reply_markup=markup)
 
 
 def handle_quiz_answer(call):
@@ -322,11 +329,16 @@ def handle_quiz_answer(call):
     quiz = quiz_data['quiz']
     q = quiz['questions'][q_index]
     correct = q['correct_answer']
+    
+    # Экранируем текст правильного ответа
+    correct_answer_text = html.escape(q['options'][correct])
+    
     if ans_index == correct:
         quiz_data['score'] += q['points']
         bot.answer_callback_query(call.id, f"✅ Правильно! +{q['points']}")
     else:
-        bot.answer_callback_query(call.id, f"❌ Неверно. Правильный ответ: {q['options'][correct]}")
+        bot.answer_callback_query(call.id, f"❌ Неверно. Правильный ответ: {correct_answer_text}")
+    
     bot.delete_message(uid, call.message.message_id)
     quiz_data['current'] += 1
     send_quiz_question(uid)
@@ -341,9 +353,18 @@ def finish_quiz(chat_id):
     max_score = quiz['total_points']
     finalize_quiz_for_user(chat_id, quiz['quiz_id'], score, max_score)
     percent = round(score / max_score * 100, 1)
-    bot.send_message(chat_id, f"🎉 Тест завершён!\n\n<b>{quiz['title']}</b>\n"
-                              f"Ваш результат: {score}/{max_score} ({percent}%)",
-                     parse_mode='HTML')
+    
+    # Создаем клавиатуру с кнопкой возврата в главное меню
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton('🏠 В главное меню', callback_data='back_main'))
+    
+    bot.send_message(
+        chat_id, 
+        f"🎉 Тест завершён!\n\n<b>{quiz['title']}</b>\n"
+        f"Ваш результат: {score}/{max_score} ({percent}%)",
+        parse_mode='HTML',
+        reply_markup=markup  # Добавляем кнопку
+    )
 
 
 if __name__ == "__main__":
